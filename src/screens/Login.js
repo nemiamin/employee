@@ -42,7 +42,7 @@ const Login = ({ navigation, login }) => {
 
                 <Input changeInput={changeInput} value={email} name='email' placeholder="Username" prefix_icon="user" />
                 <View style={{marginTop:20}}>
-                    <Input changeInput={changeInput} value={password} name='password' secureTextEntry={true} placeholder="Password" prefix_icon="lock" suffix_icon="eye" />
+                    <Input changeInput={changeInput} value={password} name='password' secureTextEntry={true} placeholder="Password" prefix_icon="lock" />
                 </View>
                 <View style={{marginTop:20, justifyContent:'center', alignItems:'center', alignContent:'center',marginBottom:10}}>
                     <Text style={{fontSize:16}}>
