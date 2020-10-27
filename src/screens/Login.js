@@ -4,8 +4,10 @@ import { red } from '../assets/colors';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { height, width } from '../assets/dimensions';
+import { connect } from 'react-redux';
+import { login } from '../action/auth';
 
-const Login = ({ navigation }) => {
+const Login = ({ navigation, login }) => {
     const [ form, setForm ] = useState({
         email: '', password: ''
     });
@@ -15,7 +17,15 @@ const Login = ({ navigation }) => {
         })
     }
 
-
+    const loginUser = async () => {
+        const response = await login(form);
+        if(response.success) {
+            setForm({
+                mobile: '', otp: ''
+            });
+            navigation.navigate('Home')
+        }
+    }
 
     const { email, password } = form;
     return (
@@ -39,7 +49,7 @@ const Login = ({ navigation }) => {
                         Remember Me
                     </Text>
                 </View>
-                <Button label="Login" bgColor={red} textColor="white" clickEvent={()=>navigation.navigate('Home')}  />
+                <Button label="Login" bgColor={red} textColor="white" clickEvent={()=>loginUser()}  />
                 <View style={{marginTop:20, justifyContent:'center', alignItems:'center', alignContent:'center',marginBottom:10}}>
                     <Text style={{fontSize:16}}>
                         Forgot Password ?
@@ -90,4 +100,8 @@ const mapStateToProps = state => ({
 })
 
 
-export default Login
+export default connect(
+    mapStateToProps, {
+        login
+    }
+) (Login)

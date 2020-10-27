@@ -4,10 +4,12 @@ import { red } from '../assets/colors';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { height, width } from '../assets/dimensions';
+import { connect } from 'react-redux';
+import { register } from '../action/auth';
 
-const Register = ({ navigation }) => {
+const Register = ({ navigation, register }) => {
     const [ form, setForm ] = useState({
-        email: '', password: ''
+        email: '', password: '', firstname: '', lastname: '', Repassword: '', mobile: ''
     });
     const [registerForm, setRegisterForm] = useState(true);
     const changeInput = (e, name) => {
@@ -16,17 +18,19 @@ const Register = ({ navigation }) => {
         })
     }
 
-    const submit = () => {
-        setRegisterForm(false);
-        setTimeout(()=>{
-            navigation.navigate('Login');
-        }, 3000);
-        
+    const submit = async () => {
+        const response = await register({...form, name: firstname+' '+lastname })
+        if(response.success) {
+            setRegisterForm(false);
+            setTimeout(()=>{
+                navigation.navigate('Login');
+            }, 3000);
+        }
     }
 
 
 
-    const { email, password } = form;
+    const { email, password, firstname, lastname, Repassword, mobile } = form;
     return (
         <ScrollView style={{
             flex: 1
@@ -42,23 +46,23 @@ const Register = ({ navigation }) => {
                 
                 <View style={{display:'flex',flexDirection:'row',paddingBottom: width * 0.05,}}>
                     <View style={{flex:1,paddingEnd:5}}>
-                        <Input changeInput={changeInput} value={email} name='email' placeholder="First Name" prefix_icon="user" icon_flex={0.2} />
+                        <Input changeInput={changeInput} value={firstname} name='firstname' placeholder="First Name" prefix_icon="user" icon_flex={0.2} />
                     </View>
                     <View style={{flex:1,paddingStart:5}}>
-                        <Input changeInput={changeInput} value={password} name='password' placeholder="Last Name" prefix_icon="user" icon_flex={0.2} />
+                        <Input changeInput={changeInput} value={lastname} name='lastname' placeholder="Last Name" prefix_icon="user" icon_flex={0.2} />
                     </View>
                 </View>
                 <View style={{marginTop:0}}>
-                        <Input changeInput={changeInput} value={password} name='password' placeholder="Mobile" prefix_icon="mobile" />
+                        <Input changeInput={changeInput} value={mobile} name='mobile' placeholder="Mobile" prefix_icon="mobile" />
                     </View>
                 <View style={{marginTop:10}}>
-                        <Input changeInput={changeInput} value={password} name='password' secureTextEntry={false} placeholder="Email ID" prefix_icon="envelope" />
+                        <Input changeInput={changeInput} value={email} name='email' secureTextEntry={false} placeholder="Email ID" prefix_icon="envelope" />
                     </View>
                     <View style={{marginTop:15}}>
                         <Input changeInput={changeInput} value={password} name='password' secureTextEntry={true} placeholder="Password" prefix_icon="lock" />
                     </View>
                 <View style={{marginTop:15, marginBottom:30}}>
-                        <Input changeInput={changeInput} value={password} name='password' secureTextEntry={true} placeholder="Confirm Password" prefix_icon="lock" />
+                        <Input changeInput={changeInput} value={Repassword} name='Repassword' secureTextEntry={true} placeholder="Confirm Password" prefix_icon="lock" />
                     </View>
 
                 <Button label="Sign Up" bgColor={red} textColor="white" clickEvent={()=>submit()} />
@@ -122,4 +126,8 @@ const mapStateToProps = state => ({
 })
 
 
-export default Register
+export default connect(
+    mapStateToProps, {
+        register
+    }
+) (Register)
