@@ -1,16 +1,60 @@
-import React from 'react';
-import { View, StyleSheet, Image, Text, ImageBackground, ScrollView } from 'react-native';
+import React,{useState,useEffect} from 'react';
+import { View, StyleSheet, Image, Text, ImageBackground, ScrollView, BackHandler } from 'react-native';
 import { height, width } from '../assets/dimensions';
-import Input from '../components/Input';
+import Menu from '../components/Menu';
 import Header from '../components/Header';
+import {listOfFoods} from '../action/auth';
+import { connect } from 'react-redux';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import Loader from '../components/Loader';
 
- const CategoryItems = ({ image, back, navigation }) => {
+ const CategoryItems = ({ image, back, navigation, listOfFoods }) => {
+     const [menus, setMenus] = useState([]);
+     const [thali, setThali] = useState([]);
+     const [menu, isMenu] = useState(true);
+     const [loading, isLoading] = useState(true);
+
+     useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
+
+      function handleBackButtonClick() {
+        navigation.goBack();
+        return true;
+    }
+
+     useEffect(()=>{
+         fetchItems()
+     },[]);
+
+     const fetchItems = async () => {
+        const response = await listOfFoods({
+            cust_id: '1',
+            org_id: '1'
+        });
+        if(response.success) {
+            // success
+            console.log(response);
+            setMenus(response.menudata);
+            setThali(response.thalidata);
+            isLoading(false);
+        }
+     }
+
     return (
-        <ScrollView style={{
+        <>
+        {loading && <Loader />}
+        {!loading &&  <ScrollView style={{
             flex: 1
         }}>
+            
+            {!loading && 
             <Header image={true} navigation={navigation} />
-        <View style={styles.main}>
+ }
+       {!loading &&  <View style={styles.main}>
             <View style={{flex:1,backgroundColor:'#E5E5E5',borderRadius:30}}>
                 <ImageBackground source={require('../assets/Mask.png')} style={{height:height*0.3}} imageStyle={{borderRadius:30}}>
                     <View style={{backgroundColor:'rgba(255, 0, 0, 0.5)', width:width*0.5, justifyContent:'flex-end', alignContent:'flex-end', alignItems:'flex-start', position:'absolute', top:'70%', marginLeft:20, borderBottomLeftRadius:10}}>
@@ -25,8 +69,8 @@ import Header from '../components/Header';
             </View>
 
         </View>
-
-        <View style={{// display:'flex',
+ }
+       {!loading &&   <View style={{// display:'flex',
         flexDirection: 'row',
         // paddingHorizontal: width * 0.04,
         backgroundColor: 'white',
@@ -35,147 +79,29 @@ import Header from '../components/Header';
         borderBottomColor:'lightgrey',
         borderBottomWidth:2}}>
         <View style={{flex:1, justifyContent:'center', alignContent:'center',alignItems:'center'}}>
-            <Text>
-                Lorem Ipsum
+        <TouchableOpacity onPress={()=>isMenu(true)} >
+        <Text style={{color:menu ? '#ED2124' : 'black', paddingTop:5,paddingBottom:5, paddingEnd:15, paddingStart:15, borderRadius:200,}}>
+                Menu
             </Text>
+        </TouchableOpacity>
         </View>
         <View style={{flex:1, justifyContent:'center', alignContent:'center',alignItems:'center'}}>
-            <Text>
-                Lorem 
+        <TouchableOpacity onPress={()=>isMenu(false)} >
+            <Text style={{color:!menu ? '#ED2124' : 'black'}}>
+                Thali 
             </Text>
-        </View>
-        <View style={{flex:1, justifyContent:'center', alignContent:'center',alignItems:'center'}}>
-            <Text>
-                Ipsum
-            </Text>
-        </View>
-        <View style={{flex:1, justifyContent:'center', alignContent:'center',alignItems:'center'}}>
-            <Text style={{color:'#ED2124', paddingTop:5,paddingBottom:5, paddingEnd:15, paddingStart:15, borderRadius:200,}}>
-                Lorem
-            </Text>
+        </TouchableOpacity>
         </View>
     </View>
 
-
-    <View style={styles.card}>
-    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4 }}>
-                        <View style={{paddingHorizontal:10,paddingVertical:10,}}>
-                            <Image source={require('../assets/food.png')} style={{height:60, width:60, borderRadius:10}} />
-                        </View>
-                        <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}>
-                        <Text style={{fontWeight:'bold'}}>
-                                Order Placed
-                            </Text>
-                            <Text>
-                                kjgchgvhgkuj
-                            </Text>
-                            <Text>
-                                kjgchgvhgkujnjbhbkjb
-                            </Text>
-                        </View>
-                    </View>
-    </View>
-
-
+ }
+    {menu &&  !loading && <Menu type="menu" data={menus} />}
 
     
-
-    <View style={styles.card}>
-    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4 }}>
-                        <View style={{paddingHorizontal:10,paddingVertical:10,}}>
-                            <Image source={require('../assets/food.png')} style={{height:60, width:60, borderRadius:10}} />
-                        </View>
-                        <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}>
-                        <Text style={{fontWeight:'bold'}}>
-                                Order Placed
-                            </Text>
-                            <Text>
-                                kjgchgvhgkuj
-                            </Text>
-                            <Text>
-                                kjgchgvhgkujnjbhbkjb
-                            </Text>
-                        </View>
-                    </View>
-    </View>
-
-
-
-    
-
-
-
-    <View style={styles.card}>
-    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4 }}>
-                        <View style={{paddingHorizontal:10,paddingVertical:10,}}>
-                            <Image source={require('../assets/food.png')} style={{height:60, width:60, borderRadius:10}} />
-                        </View>
-                        <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}>
-                        <Text style={{fontWeight:'bold'}}>
-                                Order Placed
-                            </Text>
-                            <Text>
-                                kjgchgvhgkuj
-                            </Text>
-                            <Text>
-                                kjgchgvhgkujnjbhbkjb
-                            </Text>
-                        </View>
-                    </View>
-    </View>
-
-
-
-
-
-
-    <View style={styles.card}>
-    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4 }}>
-                        <View style={{paddingHorizontal:10,paddingVertical:10,}}>
-                            <Image source={require('../assets/food.png')} style={{height:60, width:60, borderRadius:10}} />
-                        </View>
-                        <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}>
-                        <Text style={{fontWeight:'bold'}}>
-                                Order Placed
-                            </Text>
-                            <Text>
-                                kjgchgvhgkuj
-                            </Text>
-                            <Text>
-                                kjgchgvhgkujnjbhbkjb
-                            </Text>
-                        </View>
-                    </View>
-    </View>
-
-
-
-
-
-    <View style={styles.card}>
-    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4 }}>
-                        <View style={{paddingHorizontal:10,paddingVertical:10,}}>
-                            <Image source={require('../assets/food.png')} style={{height:60, width:60, borderRadius:10}} />
-                        </View>
-                        <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}>
-                        <Text style={{fontWeight:'bold'}}>
-                                Order Placed
-                            </Text>
-                            <Text>
-                                kjgchgvhgkuj
-                            </Text>
-                            <Text>
-                                kjgchgvhgkujnjbhbkjb
-                            </Text>
-                        </View>
-                    </View>
-    </View>
-
-
-
-    
-   
-        </ScrollView>
+    {!menu && !loading && <Menu type="thali" data={thali} />}
+ 
+        </ScrollView>}
+        </>
     )
 }
 
@@ -205,4 +131,13 @@ const styles = StyleSheet.create({
     }
 })
 
-export default CategoryItems;
+const mapStateToProps = state => ({
+
+})
+
+
+export default connect(
+    mapStateToProps, {
+        listOfFoods
+    }
+) (CategoryItems)

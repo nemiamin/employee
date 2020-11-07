@@ -1,35 +1,57 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ToastAndroid, BackHandler, ImageBackground } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, Modal, BackHandler, ImageBackground, TouchableHighlight } from 'react-native';
 import { red } from '../assets/colors';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { height, width } from '../assets/dimensions';
 import { connect } from 'react-redux';
 import { login } from '../action/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loader from '../components/Loader';
 
 const Login = ({ navigation, login }) => {
+    const [modalVisible, setModalVisible] = useState(false);
     const [ form, setForm ] = useState({
         email: '', password: ''
     });
+    const [loading, isLoading] = useState(false);
     const changeInput = (e, name) => {
         setForm({
             ...form, [name]: e
         })
     }
+    
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
+
+      function handleBackButtonClick() {
+        setModalVisible(true);
+        return true;
+    }
 
     const loginUser = async () => {
+      isLoading(true);
         const response = await login(form);
+        console.log(response);
         if(response.success) {
+            AsyncStorage.setItem('user', JSON.stringify(response.data))
             setForm({
                 mobile: '', otp: ''
             });
             navigation.navigate('Home')
         }
+        isLoading(false);
     }
 
     const { email, password } = form;
     return (
-        <ScrollView style={{
+      <>
+      {loading && <Loader />}
+        {!loading && <ScrollView style={{
             flex: 1
         }}>
         <ImageBackground source={require('../assets/authBg.png')} style={styles.mainContainer}>
@@ -66,7 +88,42 @@ const Login = ({ navigation, login }) => {
                 <Button label="Sign Up" bgColor={red} textColor="white" clickEvent={()=>navigation.navigate('Register')} />
             </View>
         </ImageBackground>
-         </ScrollView>
+
+        <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false)
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Are you sure you want to close this application?</Text>
+
+            <View style={{justifyContent:'center',alignContent:'center',alignItems:'center', display:'flex',flexDirection:'row'}}>
+            <TouchableHighlight
+              style={{ ...styles.openButton, backgroundColor: "#4caf50" }}
+              onPress={() => {
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.textStyle}>No</Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+              style={{ ...styles.openButton, backgroundColor: "#f44336" }}
+              onPress={() => {
+                BackHandler.exitApp();
+              }}
+            >
+              <Text style={styles.textStyle}>Yes</Text>
+            </TouchableHighlight>
+            </View>
+          </View>
+        </View>
+      </Modal>
+         </ScrollView>}
+         </>
     )
 }
 
@@ -91,7 +148,45 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'white',
         marginBottom: 8
-    }
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+      },
+      modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+      },
+      openButton: {
+        backgroundColor: "#F194FF",
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+        flex:1,
+        margin:10
+      },
+      textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+      },
+      modalText: {
+        marginBottom: 15,
+        textAlign: "center"
+      }
 })
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, ToastAndroid, BackHandler, ImageBackground } from 'react-native';
 import { red } from '../assets/colors';
 import Header from '../components/Header';
@@ -7,6 +7,17 @@ import { height, width } from '../assets/dimensions';
 import Input from '../components/Input';
 
 const Report = ({ navigation }) => {
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
+
+      function handleBackButtonClick() {
+        navigation.goBack();
+        return true;
+    }
 
     return (
         <>

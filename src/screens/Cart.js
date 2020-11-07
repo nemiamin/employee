@@ -1,11 +1,101 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ToastAndroid, BackHandler, ImageBackground } from 'react-native';
-import { red } from '../assets/colors';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, BackHandler, ImageBackground } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import { height, width } from '../assets/dimensions';
+import {createOrder} from '../action/auth';
+import { connect } from 'react-redux';
 
-const Cart = ({ navigation }) => {
+const Cart = ({ navigation, createOrder }) => {
+    const [item, setItem] = useState([]);
+    const [deliveryAmount, setTotalPrice] = useState(0);
+    const [subTotal, setSubTotal] = useState(0);
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
+
+      function handleBackButtonClick() {
+        navigation.goBack();
+        return true;
+    }
+
+    useEffect(()=>{
+        showCart();
+    },[])
+
+    const showCart = async () => {
+        const isExist = await AsyncStorage.getItem('cart');
+        if(JSON.parse(isExist) && JSON.parse(isExist).length > 0) {
+            setItem(JSON.parse(isExist));
+            let v_amount = 0;
+            JSON.parse(isExist).map(v => {
+                v_amount = v_amount + (parseInt(v.dish_price) * v.quantity);
+            });
+            setSubTotal(v_amount)
+        } else {
+            setSubTotal(0)
+            setItem([]);
+        }
+    }
+
+    const addToCart = async (item) => {
+        const isExist = await AsyncStorage.getItem('cart');
+        if(JSON.parse(isExist) && JSON.parse(isExist).length > 0) {
+            let itemExists = JSON.parse(isExist).find(v => (item.type == 'menu') ? v.item_id ==  item.menuid : v.item_id == item.thali_id );
+            if(itemExists) {
+                let items = JSON.parse(isExist).map(v => ((item.type == 'menu') ? v.item_id ==  item.menuid : v.item_id == item.thali_id) ? {...v, quantity: v.quantity + 1} : v );
+                AsyncStorage.setItem('cart', JSON.stringify(items));
+            } else {
+                AsyncStorage.setItem('cart', JSON.stringify([...JSON.parse(isExist),{...item,quantity: 1, type:item.type, item_id: item.type == 'menu' ? item.menuid : item.thali_id }]));
+            }
+        }
+        showCart()
+    }
+
+    const removeItem = async (item) => {
+        const isExist = await AsyncStorage.getItem('cart');
+        if(item.quantity > 1) {
+            if(JSON.parse(isExist) && JSON.parse(isExist).length > 0) {
+                let itemExists = JSON.parse(isExist).find(v => (item.type == 'menu') ? v.item_id ==  item.menuid : v.item_id == item.thali_id );
+            if(itemExists) {
+                let items = JSON.parse(isExist).map(v => ((item.type == 'menu') ? v.item_id ==  item.menuid : v.item_id == item.thali_id) ? {...v, quantity: v.quantity - 1} : v );
+                AsyncStorage.setItem('cart', JSON.stringify(items));
+                
+            }
+            }
+        } else {
+                let itemExists = JSON.parse(isExist).filter(v => (item.type == 'menu') ? v.item_id !=  item.menuid : v.item_id != item.thali_id );
+                AsyncStorage.setItem('cart', JSON.stringify(itemExists));
+            console.log(itemExists)
+        }
+        showCart();
+    }
+    
+    const pay = async () => {
+        let user = await AsyncStorage.getItem('user');
+        if(item && item.length > 0) {
+            let foodname = [];
+            let dishcount = [];
+            item.map((v,index) => {
+                foodname.push( v.item_id);
+                dishcount.push(v.quantity);
+            });
+
+            const response = await createOrder({foodname, dishcount, totalprice: deliveryAmount + subTotal, cust_id: JSON.parse(user).cust_id});
+            console.log('api response ==++++++++++>',response);
+        if(response.success) {
+            AsyncStorage.removeItem('cart');
+            navigation.navigate('OrderSuccess')
+        }
+        }
+        // navigation.navigate('OrderSuccess')
+        
+    }
 
     return (
         <>
@@ -45,69 +135,49 @@ const Cart = ({ navigation }) => {
 
 
             <View style={{...styles.deliveryAddress, borderBottomWidth:1, borderBottomColor:'lightgrey'}}>
-            <View style={{display:'flex', flexDirection:'row',flex:1,marginLeft:0,  marginRight:0 }}>
+            
+            
+            
+            {item && item.length > 0 && item.map((cart, index) => 
+            <View key={index} style={{display:'flex', flexDirection:'row',flex:1,marginLeft:0,  marginRight:0, marginTop:5 }}>
                         <View style={{}}>
-                            <Image source={require('../assets/food.png')} style={{height:60, width:60, borderRadius:10}} />
+                            <Image source={{ uri: 'http://food.breeur.in/'+cart.menu_img }} style={{height:60, width:60, borderRadius:10}} />
                         </View>
                         <View style={{flex:1, marginLeft:20,}}>
                             <Text style={{fontWeight:'bold'}}>
-                                Thali
+                                {cart.type=='menu'?cart.dish_name : cart.thali_name}
                             </Text>
                             <Text style={{color:'grey'}}>
-                                kjgchgvhgkuj
+                                {cart.type=='menu'?cart.menu_category: cart.dish_include}
                             </Text>
                             <View style={{display:'flex', flexDirection:'row',}}>
                                 <Text style={{flex:1}}>
-                                    Rs. 200
+                                    Rs. {parseInt(cart.dish_price) * cart.quantity}
                                 </Text>
                                 <View style={{display:'flex', flexDirection:'row',}}>
-                                    <Image source={require('../assets/-.png')} style={{}} />
-                                    <Text style={{marginLeft:10, marginRight:10}}>1</Text>
-                                    <Image source={require('../assets/+.png')} />
+                                    <TouchableOpacity onPress={()=>removeItem(cart)}>
+                                        <Image source={require('../assets/minus.png')} style={{}} />
+                                    </TouchableOpacity>
+            <Text style={{marginLeft:10, marginRight:10}}>{cart.quantity}</Text>
+                                    <TouchableOpacity onPress={()=>addToCart(cart)}>
+                                        <Image source={require('../assets/plus.png')} />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
                         </View>
+            )}
 
 
 
 
-
-
-                        <View style={{display:'flex', flexDirection:'row',flex:1,marginLeft:0,  marginRight:0, marginTop:20 }}>
-                        <View style={{}}>
-                            <Image source={require('../assets/food.png')} style={{height:60, width:60, borderRadius:10}} />
-                        </View>
-                        <View style={{flex:1, marginLeft:20,}}>
-                            <Text style={{fontWeight:'bold'}}>
-                                Thali
-                            </Text>
-                            <Text style={{color:'grey'}}>
-                                kjgchgvhgkuj
-                            </Text>
-                            <View style={{display:'flex', flexDirection:'row',}}>
-                                <Text style={{flex:1}}>
-                                    Rs. 200
-                                </Text>
-                                <View style={{display:'flex', flexDirection:'row',}}>
-                                    <Image source={require('../assets/-.png')} style={{}} />
-                                    <Text style={{marginLeft:10, marginRight:10}}>1</Text>
-                                    <Image source={require('../assets/+.png')} />
-                                </View>
-                            </View>
-                        </View>
-                        </View>
-
-
-
-
-                        <View style={{paddingVertical:20}}>
+                        <View style={{paddingVertical:20, marginBottom:50}}>
                             <View style={{display:'flex', flexDirection:'row',}}>
                                 <Text style={{fontSize:16, flex:1}}>
                                     Sub Total
                                 </Text>
                                 <Text>
-                                    Rs. 600
+                                    Rs. {subTotal}
                                 </Text>
                             </View>
                             <View style={{display:'flex', flexDirection:'row',}}>
@@ -115,7 +185,7 @@ const Cart = ({ navigation }) => {
                                     Delivery Fee
                                 </Text>
                                 <Text>
-                                    Rs. 80
+                                    Rs. {deliveryAmount}
                                 </Text>
                             </View>
                             <View style={{display:'flex', flexDirection:'row',}}>
@@ -123,7 +193,7 @@ const Cart = ({ navigation }) => {
                                     Total
                                 </Text>
                                 <Text>
-                                    Rs. 680
+                                    Rs. {subTotal + deliveryAmount}
                                 </Text>
                             </View>
                         </View>
@@ -134,14 +204,14 @@ const Cart = ({ navigation }) => {
                 <View style={{display:'flex', flexDirection:'row',paddingHorizontal:10,paddingVertical:10}}>
                                 <View style={{flex:0.8}}>
                                     <Text style={{fontWeight:'bold', fontSize:16, }}>
-                                        Total: Rs. 680
+                                        Total: Rs. {subTotal + deliveryAmount}
                                     </Text>
                                     <Text style={{ fontSize:16, color:'grey'}}>
-                                        2 items
+                                        {item.length} items
                                     </Text>
                                 </View>
                                 <View style={{flex:0.3}}>
-                                    <Button label="Pay" bgColor="#B50019" textColor="white" clickEvent={()=>navigation.navigate('OrderSuccess')}  />
+                                    <Button label="Pay" bgColor="#B50019" textColor="white" clickEvent={()=>pay()}  />
                                 </View>
                             </View>
                 </View>
@@ -178,4 +248,8 @@ const mapStateToProps = state => ({
 })
 
 
-export default Cart
+export default connect(
+    mapStateToProps, {
+        createOrder
+    }
+) (Cart)

@@ -16,10 +16,28 @@ import Report from '../screens/Report';
 import CategoryItems from '../screens/CategoryItems';
 import CafeDensity from '../screens/CafeDensity';
 import Health from '../screens/Health';
+import Orders from '../screens/Orders';
 
 
 const UiStack = createStackNavigator();
-const UiNavigator = ({ navigation }) => (
+const UiNavigator = ({ navigation, isLoggedIn }) => isLoggedIn ? (
+    <UiStack.Navigator headerMode='none'>
+        <UiStack.Screen name='Home' component={Home} />
+        <UiStack.Screen name='Login' component={Login} />
+        <UiStack.Screen name='Register' component={Register} />
+        
+        <UiStack.Screen name='Search' component={Search} />
+        <UiStack.Screen name='Cart' component={Cart} />
+        <UiStack.Screen name='OrderSuccess' component={OrderSuccess} />
+        <UiStack.Screen name='Feedback' component={Feedback} />
+        <UiStack.Screen name='OrderStatus' component={OrderStatus} />
+        <UiStack.Screen name='Report' component={Report} />
+        <UiStack.Screen name='CategoryItems' component={CategoryItems} />
+        <UiStack.Screen name='CafeDensity' component={CafeDensity} />
+        <UiStack.Screen name='Health' component={Health} />
+        <UiStack.Screen name='Orders' component={Orders} />
+    </UiStack.Navigator>
+) : (
     <UiStack.Navigator headerMode='none'>
         <UiStack.Screen name='Login' component={Login} />
         <UiStack.Screen name='Register' component={Register} />
@@ -33,12 +51,13 @@ const UiNavigator = ({ navigation }) => (
         <UiStack.Screen name='CategoryItems' component={CategoryItems} />
         <UiStack.Screen name='CafeDensity' component={CafeDensity} />
         <UiStack.Screen name='Health' component={Health} />
+        <UiStack.Screen name='Orders' component={Orders} />
     </UiStack.Navigator>
 )
 
-const Navigation = () => (
+const Navigation = ({isLoggedIn}) => (
     <NavigationContainer>
-        <UiNavigator />
+        <UiNavigator isLoggedIn={isLoggedIn} />
     </NavigationContainer>
     )
     

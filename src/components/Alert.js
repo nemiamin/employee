@@ -5,7 +5,6 @@ const { height, width } = Dimensions.get('window');
 import { reset } from '../action/toast';
 
 const Alert = ({ toasts, reset }) => {
-    console.log(toasts, 'toasts')
     return (
        <Fragment>
         {toasts && (

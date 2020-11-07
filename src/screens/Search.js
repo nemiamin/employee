@@ -1,10 +1,23 @@
-import React from 'react';
-import { View, StyleSheet, Image, Text, ImageBackground } from 'react-native';
+import React,{useEffect} from 'react';
+import { View, StyleSheet, Image, Text, BackHandler } from 'react-native';
 import { height, width } from '../assets/dimensions';
 import Input from '../components/Input';
 import { ScrollView } from 'react-native-gesture-handler';
 
  const TitleContainer = ({ image, back, navigation }) => {
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
+
+      function handleBackButtonClick() {
+        navigation.goBack();
+        return true;
+    }
+
     return (
        
         <View style={styles.main}>

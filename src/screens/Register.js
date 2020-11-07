@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, ToastAndroid, BackHandler, ImageBackground } from 'react-native';
 import { red } from '../assets/colors';
 import Input from '../components/Input';
@@ -6,11 +6,27 @@ import Button from '../components/Button';
 import { height, width } from '../assets/dimensions';
 import { connect } from 'react-redux';
 import { register } from '../action/auth';
+import Loader from '../components/Loader';
 
 const Register = ({ navigation, register }) => {
+const [loading, isLoading] = useState(false);
     const [ form, setForm ] = useState({
         email: '', password: '', firstname: '', lastname: '', Repassword: '', mobile: ''
     });
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
+
+      function handleBackButtonClick() {
+        navigation.goBack();
+        return true;
+    }
+
+
     const [registerForm, setRegisterForm] = useState(true);
     const changeInput = (e, name) => {
         setForm({
@@ -19,6 +35,7 @@ const Register = ({ navigation, register }) => {
     }
 
     const submit = async () => {
+        isLoading(true);
         const response = await register({...form, name: firstname+' '+lastname })
         if(response.success) {
             setRegisterForm(false);
@@ -26,13 +43,16 @@ const Register = ({ navigation, register }) => {
                 navigation.navigate('Login');
             }, 3000);
         }
+        isLoading(false);
     }
 
 
 
     const { email, password, firstname, lastname, Repassword, mobile } = form;
     return (
-        <ScrollView style={{
+        <>
+        {loading && <Loader />}
+        {!loading && <ScrollView style={{
             flex: 1
         }}>
         {registerForm && <ImageBackground source={require('../assets/authBg.png')} style={styles.mainContainer}>
@@ -91,7 +111,8 @@ const Register = ({ navigation, register }) => {
                 </View>
             </View>
         </ImageBackground>}
-         </ScrollView>
+         </ScrollView>}
+         </>
     )
 }
 

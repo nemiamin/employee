@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, ToastAndroid, BackHandler, ImageBackground } from 'react-native';
 import Header from '../components/Header';
 import { height, width } from '../assets/dimensions';
 import Button from '../components/Button';
 
 const Feedback = ({ navigation }) => {
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
 
+      function handleBackButtonClick() {
+        navigation.goBack();
+        return true;
+    }
     return (
         <ScrollView style={{
             flex: 1

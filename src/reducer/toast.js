@@ -4,7 +4,6 @@ const initialState = [];
 
 export default (state = initialState, action) => {
     const { payload, type } = action;
-    console.log(payload, 'fires the toast =====>')
     switch(type) {
         case SET_ERROR:
             return [...state, payload]

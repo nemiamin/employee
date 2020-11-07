@@ -1,12 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect,useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, ToastAndroid, BackHandler, ImageBackground } from 'react-native';
 import Header from '../components/Header';
 import { height, width } from '../assets/dimensions';
 import Button from '../components/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import MapView, {PROVIDER_GOOGLE,Marker} from 'react-native-maps';
+import GetLocation from 'react-native-get-location'
 
 const OrderStatus = ({ navigation }) => {
+    const [latitude, setLatitude] = useState(null);
+    const [longitude, setLongitude] = useState(null);
 
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          backHandler.remove();
+        };
+      }, []);
+
+      useEffect(()=>{
+          getGeoLocation()
+      },[])
+
+      const getGeoLocation = () => {
+        GetLocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 15000,
+        })
+        .then(location => {
+            console.log(location);
+            setLatitude(location.latitude);
+            setLongitude(location.longitude);
+        })
+        .catch(error => {
+            const { code, message } = error;
+            console.warn(code, message);
+        })
+      }
+
+      function handleBackButtonClick() {
+        navigation.goBack();
+        return true;
+    }
     return (
         <ScrollView style={{
             flex: 1,
@@ -24,7 +59,20 @@ const OrderStatus = ({ navigation }) => {
                 </Text>
                 <Image source={require('../assets/line.png')} style={{marginBottom:20}} />
             </View>
-            <Image source={require('../assets/map.png')} style={{height:height*0.4, width:width,}} />
+            {longitude && <MapView  style={{flex: 1,height:height*0.4, width:width,}}  region={{ latitude: latitude,longitude: longitude,latitudeDelta: 0.0922,longitudeDelta: 0.0421 }} showsUserLocation={true}
+            zoomEnabled={true}
+            provider={PROVIDER_GOOGLE}
+             >
+{/* {this.state.markers.map(marker => ( */}
+    <Marker
+      coordinate={{latitude: latitude,longitude: longitude}}
+      title={'hi'}
+      description={'marker.description'}
+    />
+  {/* ))} */}
+
+             </MapView>}
+            {/* <Image source={require('../assets/map.png')} style={{height:height*0.4, width:width,}} /> */}
             <View style={styles.userContainer}>
                 <View style={{display:'flex', flexDirection:'row', padding:20}}>
                     <View style={{flex:0.4}}>
