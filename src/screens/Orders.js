@@ -34,23 +34,55 @@ const [orders, setOrders] = useState([])
 <View style={{paddingHorizontal:30, paddingVertical:30}}>
     <Text style={{fontSize:24, fontWeight:'500', letterSpacing:1}}>Orders</Text>
 </View>
+<View style={styles.card}>
+    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4, padding:20 }}>
+                        {/* <View style={{paddingHorizontal:10,paddingVertical:10,}}>
+                            <Image source={{ uri: 'http://food.breeur.in/'+item.menu_img }} style={{height:60, width:60, borderRadius:10}} />
+                        </View> */}
+                        {/* <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}> */}
+                        <Text style={{fontWeight:'bold', flex:1}}>
+                                Name
+                            </Text>
+                            <Text style={{flex:1}}>
+                                Count
+                            </Text>
+                            <Text style={{flex:1}}>
+                                Calorie
+                            </Text>
+                            <Text style={{flex:1}}>
+                                Amount
+                            </Text>
+                            <Text style={{flex:1}}>
+                                Status
+                            </Text>
+                        {/* </View> */}
+                        
+
+                    </View>
+    </View>
             {orders && orders.length > 0 && orders.map((item,index) =>
         <View key={index} style={styles.card}>
-    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4 }}>
-                        <View style={{paddingHorizontal:10,paddingVertical:10,}}>
+    <View style={{display:'flex', flexDirection:'row',flex:1, borderBottomColor:'lightgrey',borderBottomWidth:1,backgroundColor:'white',borderTopRightRadius:15, borderBottomRightRadius:15,elevation:4, padding:20 }}>
+                        {/* <View style={{paddingHorizontal:10,paddingVertical:10,}}>
                             <Image source={{ uri: 'http://food.breeur.in/'+item.menu_img }} style={{height:60, width:60, borderRadius:10}} />
-                        </View>
-                        <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}>
-                        <Text style={{fontWeight:'bold'}}>
-                                {type=='menu'?item.dish_name : item.thali_name}
+                        </View> */}
+                        {/* <View style={{flex:1, marginLeft:20,paddingHorizontal:10,paddingVertical:10,}}> */}
+                        <Text style={{fontWeight:'bold', flex:1.5}}>
+                                {item.itemname}
                             </Text>
-                            <Text>
-                                {type=='menu'?item.menu_category: item.dish_include}
+                            <Text style={{flex:1}}>
+                                {item.itemcount}
                             </Text>
-                            <Text>
-                                Rs. {item.dish_price}
+                            <Text style={{flex:1}}>
+                                {item.cal_count}
                             </Text>
-                        </View>
+                            <Text style={{flex:1}}>
+                                {item.amount}
+                            </Text>
+                            <Text style={{flex:1}}>
+                                {item.status == '' ? 'Order Placed' : item.status}
+                            </Text>
+                        {/* </View> */}
                         
 
                     </View>
